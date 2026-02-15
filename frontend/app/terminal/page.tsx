@@ -77,8 +77,8 @@ const SidebarSkeleton = () => (
         animate={{ opacity: 1, x: 0 }}
         transition={{ delay: i * 0.1 }}
       >
-        <div className="h-3 w-3/4 bg-white/5 rounded animate-pulse" />
-        <div className="h-2 w-1/4 bg-white/5 rounded animate-pulse" />
+        <div className="h-3 w-3/4 bg-gray-200 dark:bg-white/5 rounded animate-pulse" />
+        <div className="h-2 w-1/4 bg-gray-200 dark:bg-white/5 rounded animate-pulse" />
       </motion.div>
     ))}
   </div>
@@ -93,10 +93,10 @@ const MessageListSkeleton = () => (
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4 }}
     >
-      <div className="bg-zinc-900/50 border border-zinc-800 px-5 py-4 rounded-2xl rounded-tl-none w-2/3 max-w-sm backdrop-blur-sm">
+      <div className="bg-gray-100 dark:bg-zinc-900/50 border border-gray-200 dark:border-zinc-800 px-5 py-4 rounded-2xl rounded-tl-none w-2/3 max-w-sm backdrop-blur-sm">
         <div className="space-y-2">
-          <div className="h-2 w-full bg-white/5 rounded-full animate-pulse" />
-          <div className="h-2 w-[80%] bg-white/5 rounded-full animate-pulse delay-75" />
+          <div className="h-2 w-full bg-gray-200 dark:bg-white/5 rounded-full animate-pulse" />
+          <div className="h-2 w-[80%] bg-gray-200 dark:bg-white/5 rounded-full animate-pulse delay-75" />
         </div>
       </div>
     </motion.div>
@@ -120,11 +120,11 @@ const MessageListSkeleton = () => (
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4, delay: 0.4 }}
     >
-      <div className="bg-zinc-900/50 border border-zinc-800 px-5 py-4 rounded-2xl rounded-tl-none w-full max-w-md backdrop-blur-sm">
+      <div className="bg-gray-100 dark:bg-zinc-900/50 border border-gray-200 dark:border-zinc-800 px-5 py-4 rounded-2xl rounded-tl-none w-full max-w-md backdrop-blur-sm">
         <div className="space-y-2">
-          <div className="h-2 w-full bg-white/5 rounded-full animate-pulse" />
-          <div className="h-2 w-full bg-white/5 rounded-full animate-pulse delay-100" />
-          <div className="h-2 w-[60%] bg-white/5 rounded-full animate-pulse delay-150" />
+          <div className="h-2 w-full bg-gray-200 dark:bg-white/5 rounded-full animate-pulse" />
+          <div className="h-2 w-full bg-gray-200 dark:bg-white/5 rounded-full animate-pulse delay-100" />
+          <div className="h-2 w-[60%] bg-gray-200 dark:bg-white/5 rounded-full animate-pulse delay-150" />
         </div>
       </div>
     </motion.div>
@@ -154,15 +154,15 @@ const LiveStatsCard = () => {
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="bg-gradient-to-br from-zinc-900/80 to-zinc-800/50 border border-zinc-700/50 rounded-2xl p-4 backdrop-blur-xl"
+      className="bg-gradient-to-br from-gray-50 to-gray-100 dark:from-zinc-900/80 dark:to-zinc-800/50 border border-gray-200 dark:border-zinc-700/50 rounded-2xl p-4 backdrop-blur-xl"
     >
       <div className="flex items-center gap-2 mb-4">
-        <div className="w-8 h-8 rounded-lg bg-cyan-900/30 flex items-center justify-center border border-cyan-500/30">
-          <Activity className="w-4 h-4 text-cyan-400" />
+        <div className="w-8 h-8 rounded-lg bg-cyan-100 dark:bg-cyan-900/30 flex items-center justify-center border border-cyan-200 dark:border-cyan-500/30">
+          <Activity className="w-4 h-4 text-cyan-600 dark:text-cyan-400" />
         </div>
-        <span className="font-bold text-sm text-zinc-200">Live Network Stats</span>
-        <span className="ml-auto text-xs font-semibold text-emerald-400 bg-emerald-900/20 px-2 py-1 rounded-full border border-emerald-500/20 flex items-center gap-1">
-          <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span> Live
+        <span className="font-bold text-sm text-gray-800 dark:text-zinc-200">Live Network Stats</span>
+        <span className="ml-auto text-xs font-semibold text-emerald-600 dark:text-emerald-400 bg-emerald-100 dark:bg-emerald-900/20 px-2 py-1 rounded-full border border-emerald-200 dark:border-emerald-500/20 flex items-center gap-1">
+          <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 dark:bg-emerald-400 animate-pulse"></span> Live
         </span>
       </div>
       
@@ -172,12 +172,12 @@ const LiveStatsCard = () => {
             key={stats.gasPrice}
             initial={{ scale: 1.2, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
-            className="text-lg font-black text-cyan-400 flex items-center justify-center gap-1"
+            className="text-lg font-black text-cyan-600 dark:text-cyan-400 flex items-center justify-center gap-1"
           >
             <Zap className="w-3 h-3" />
             {stats.gasPrice}
           </motion.div>
-          <div className="text-[10px] text-zinc-500 font-medium">Gwei</div>
+          <div className="text-[10px] text-gray-500 dark:text-zinc-500 font-medium">Gwei</div>
         </div>
         
         <div className="text-center">
@@ -185,11 +185,11 @@ const LiveStatsCard = () => {
             key={stats.volume24h}
             initial={{ scale: 1.2, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
-            className="text-lg font-black text-purple-400"
+            className="text-lg font-black text-purple-600 dark:text-purple-400"
           >
             ${stats.volume24h}M
           </motion.div>
-          <div className="text-[10px] text-zinc-500 font-medium">24h Vol</div>
+          <div className="text-[10px] text-gray-500 dark:text-zinc-500 font-medium">24h Vol</div>
         </div>
         
         <div className="text-center">
@@ -197,11 +197,11 @@ const LiveStatsCard = () => {
             key={stats.activeSwaps}
             initial={{ scale: 1.2, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
-            className="text-lg font-black text-pink-400"
+            className="text-lg font-black text-pink-600 dark:text-pink-400"
           >
             {stats.activeSwaps}
           </motion.div>
-          <div className="text-[10px] text-zinc-500 font-medium">Active</div>
+          <div className="text-[10px] text-gray-500 dark:text-zinc-500 font-medium">Active</div>
         </div>
       </div>
     </motion.div>
@@ -607,14 +607,14 @@ export default function TerminalPage() {
   // Show loading state while checking authentication
   if (authLoading) {
     return (
-      <div className="flex h-screen bg-[#050505] items-center justify-center">
+      <div className="flex h-screen bg-white dark:bg-[#050505] items-center justify-center transition-colors">
         <div className="text-center">
           <motion.div 
-            className="mx-auto mb-4 w-12 h-12 border-2 border-cyan-500/30 border-t-cyan-500 rounded-full"
+            className="mx-auto mb-4 w-12 h-12 border-2 border-cyan-200 dark:border-cyan-500/30 border-t-cyan-600 dark:border-t-cyan-500 rounded-full"
             animate={{ rotate: 360 }}
             transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
           />
-          <p className="text-zinc-400">Authenticating...</p>
+          <p className="text-gray-600 dark:text-zinc-400">Authenticating...</p>
         </div>
       </div>
     );
@@ -629,11 +629,11 @@ export default function TerminalPage() {
     <>
       <Navbar />
       
-      <div className="flex h-screen bg-[#030308] text-white overflow-hidden pt-16 relative">
-        {/* Animated background gradient */}
+      <div className="flex h-screen overflow-hidden pt-16 relative transition-colors">
+        {/* Animated background gradient - reduced opacity for light mode */}
         <div className="fixed inset-0 pointer-events-none">
           <motion.div
-            className="absolute top-0 left-1/4 w-[600px] h-[600px] bg-gradient-to-r from-cyan-500/5 via-purple-500/5 to-pink-500/5 rounded-full blur-[150px]"
+            className="absolute top-0 left-1/4 w-[600px] h-[600px] bg-gradient-to-r from-cyan-200/20 via-purple-200/20 to-pink-200/20 dark:from-cyan-500/5 dark:via-purple-500/5 dark:to-pink-500/5 rounded-full blur-[150px]"
             animate={{
               x: [0, 100, 0],
               y: [0, 50, 0],
@@ -642,7 +642,7 @@ export default function TerminalPage() {
             transition={{ duration: 15, repeat: Infinity, ease: "easeInOut" }}
           />
           <motion.div
-            className="absolute bottom-0 right-1/4 w-[500px] h-[500px] bg-gradient-to-r from-purple-500/5 via-pink-500/5 to-cyan-500/5 rounded-full blur-[150px]"
+            className="absolute bottom-0 right-1/4 w-[500px] h-[500px] bg-gradient-to-r from-purple-200/20 via-pink-200/20 to-cyan-200/20 dark:from-purple-500/5 dark:via-pink-500/5 dark:to-cyan-500/5 rounded-full blur-[150px]"
             animate={{
               x: [0, -80, 0],
               y: [0, -60, 0],
@@ -651,7 +651,7 @@ export default function TerminalPage() {
             transition={{ duration: 12, repeat: Infinity, ease: "easeInOut" }}
           />
           
-          {/* Floating particles */}
+          {/* Floating particles - visible in both themes */}
           {particles.map((p) => (
             <FloatingParticle key={p.id} {...p} />
           ))}
@@ -659,9 +659,9 @@ export default function TerminalPage() {
 
         {/* Grid overlay */}
         <div
-          className="fixed inset-0 pointer-events-none opacity-[0.015]"
+          className="fixed inset-0 pointer-events-none opacity-[0.03] dark:opacity-[0.015]"
           style={{
-            backgroundImage: `linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px)`,
+            backgroundImage: `linear-gradient(rgba(100,100,100,0.3) 1px, transparent 1px), linear-gradient(90deg, rgba(100,100,100,0.3) 1px, transparent 1px)`,
             backgroundSize: '60px 60px',
           }}
         />
@@ -674,11 +674,11 @@ export default function TerminalPage() {
               animate={{ width: 320, opacity: 1 }}
               exit={{ width: 0, opacity: 0 }}
               transition={{ duration: 0.3, ease: "easeInOut" }}
-              className="bg-gradient-to-b from-zinc-900/50 to-zinc-900/30 border-r border-zinc-800/50 flex flex-col overflow-hidden backdrop-blur-xl relative z-10"
+              className="bg-gradient-to-b from-gray-50 to-gray-100/50 dark:from-zinc-900/50 dark:to-zinc-900/30 border-r border-gray-200 dark:border-zinc-800/50 flex flex-col overflow-hidden backdrop-blur-xl relative z-10"
             >
-              <div className="p-4 border-b border-zinc-800/50">
+              <div className="p-4 border-b border-gray-200 dark:border-zinc-800/50">
                 <motion.button 
-                  className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 rounded-xl transition-all duration-300 text-sm font-bold shadow-lg shadow-cyan-900/20"
+                  className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 rounded-xl transition-all duration-300 text-sm font-bold shadow-lg shadow-cyan-500/20 dark:shadow-cyan-900/20 text-white"
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
                 >
@@ -695,7 +695,7 @@ export default function TerminalPage() {
               {/* Chat History */}
               <div className="flex-1 overflow-y-auto p-2 mt-4">
                 <div className="mb-4">
-                  <div className="flex items-center gap-2 px-3 py-2 text-xs font-semibold text-zinc-500 uppercase tracking-wider">
+                  <div className="flex items-center gap-2 px-3 py-2 text-xs font-semibold text-gray-500 dark:text-zinc-500 uppercase tracking-wider">
                     <Clock className="w-3 h-3" />
                     Recent Chats
                   </div>
@@ -709,13 +709,13 @@ export default function TerminalPage() {
                           initial={{ opacity: 0, x: -20 }}
                           animate={{ opacity: 1, x: 0 }}
                           transition={{ delay: index * 0.1 }}
-                          className="w-full text-left px-3 py-3 rounded-xl hover:bg-white/5 transition-all duration-200 group border border-transparent hover:border-cyan-500/20"
+                          className="w-full text-left px-3 py-3 rounded-xl hover:bg-gray-100 dark:hover:bg-white/5 transition-all duration-200 group border border-transparent hover:border-cyan-200 dark:hover:border-cyan-500/20"
                           whileHover={{ x: 4 }}
                         >
-                          <p className="text-sm text-zinc-300 truncate group-hover:text-white transition-colors font-medium">
+                          <p className="text-sm text-gray-700 dark:text-zinc-300 truncate group-hover:text-gray-900 dark:group-hover:text-white transition-colors font-medium">
                             {chat.title}
                           </p>
-                          <p className="text-xs text-zinc-600 mt-0.5">
+                          <p className="text-xs text-gray-500 dark:text-zinc-600 mt-0.5">
                             {chat.timestamp}
                           </p>
                         </motion.button>
@@ -726,11 +726,11 @@ export default function TerminalPage() {
               </div>
 
               {/* Sidebar Footer */}
-              <div className="p-3 border-t border-zinc-800/50 space-y-1 bg-zinc-900/30">
+              <div className="p-3 border-t border-gray-200 dark:border-zinc-800/50 space-y-1 bg-gray-100/50 dark:bg-zinc-900/30">
                 <motion.a
                   href="https://t.me/SwapSmithBot"
                   target="_blank"
-                  className="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-white/5 transition-all duration-200 text-sm text-zinc-400 hover:text-cyan-400 group"
+                  className="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-gray-200 dark:hover:bg-white/5 transition-all duration-200 text-sm text-gray-600 dark:text-zinc-400 hover:text-cyan-600 dark:hover:text-cyan-400 group"
                   whileHover={{ x: 4 }}
                 >
                   <MessageCircle className="w-4 h-4 group-hover:scale-110 transition-transform" />
@@ -738,7 +738,7 @@ export default function TerminalPage() {
                 </motion.a>
                 <Link href="/profile">
                   <motion.button 
-                    className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-white/5 transition-all duration-200 text-sm text-zinc-400 hover:text-purple-400 group"
+                    className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-gray-200 dark:hover:bg-white/5 transition-all duration-200 text-sm text-gray-600 dark:text-zinc-400 hover:text-purple-600 dark:hover:text-purple-400 group"
                     whileHover={{ x: 4 }}
                   >
                     <Settings className="w-4 h-4 group-hover:rotate-90 transition-transform duration-300" />
@@ -758,12 +758,12 @@ export default function TerminalPage() {
             {/* Sidebar Toggle Button */}
             <motion.button
               onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-              className="fixed top-20 left-4 z-40 p-2.5 bg-zinc-900/90 hover:bg-zinc-800 border border-zinc-700/50 rounded-xl transition-all duration-300 shadow-lg backdrop-blur-sm group"
+              className="fixed top-20 left-4 z-40 p-2.5 bg-white/90 dark:bg-zinc-900/90 hover:bg-gray-100 dark:hover:bg-zinc-800 border border-gray-300 dark:border-zinc-700/50 rounded-xl transition-all duration-300 shadow-lg backdrop-blur-sm group"
               title={isSidebarOpen ? 'Hide sidebar' : 'Show sidebar'}
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
             >
-              <Menu className="w-5 h-5 text-zinc-300 group-hover:text-cyan-400 transition-colors" />
+              <Menu className="w-5 h-5 text-gray-700 dark:text-zinc-300 group-hover:text-cyan-600 dark:group-hover:text-cyan-400 transition-colors" />
             </motion.button>
 
             {/* Header Section */}
@@ -781,7 +781,7 @@ export default function TerminalPage() {
                   transition={{ delay: 0.2 }}
                 >
                   <motion.div
-                    className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-cyan-500/10 to-purple-500/10 border border-cyan-500/20 rounded-full"
+                    className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-cyan-100 to-purple-100 dark:from-cyan-500/10 dark:to-purple-500/10 border border-cyan-200 dark:border-cyan-500/20 rounded-full"
                     animate={{ 
                       boxShadow: [
                         "0 0 20px rgba(34,211,238,0.1)", 
@@ -791,18 +791,18 @@ export default function TerminalPage() {
                     }}
                     transition={{ duration: 2, repeat: Infinity }}
                   >
-                    <Sparkles className="w-4 h-4 text-cyan-400" />
-                    <span className="text-xs font-semibold text-cyan-300 tracking-wider uppercase">AI Trading Assistant</span>
+                    <Sparkles className="w-4 h-4 text-cyan-600 dark:text-cyan-400" />
+                    <span className="text-xs font-semibold text-cyan-700 dark:text-cyan-300 tracking-wider uppercase">AI Trading Assistant</span>
                   </motion.div>
                 </motion.div>
 
                 <h1 className="text-5xl md:text-7xl font-black tracking-tighter leading-[0.9]">
-                  <span className="bg-gradient-to-b from-white via-white to-white/40 bg-clip-text text-transparent">
+                  <span className="bg-gradient-to-b from-gray-900 via-gray-700 to-gray-500 dark:from-white dark:via-white dark:to-white/40 bg-clip-text text-transparent">
                     Terminal
                   </span>
                   <br />
                   <motion.span
-                    className="bg-gradient-to-r from-cyan-400 via-purple-400 to-pink-400 bg-clip-text text-transparent"
+                    className="bg-gradient-to-r from-cyan-500 via-purple-500 to-pink-500 dark:from-cyan-400 dark:via-purple-400 dark:to-pink-400 bg-clip-text text-transparent"
                     animate={{
                       backgroundPosition: ["0% 50%", "100% 50%", "0% 50%"],
                     }}
@@ -813,7 +813,7 @@ export default function TerminalPage() {
                   </motion.span>
                 </h1>
                 
-                <p className="text-zinc-500 text-sm max-w-xl mx-auto">
+                <p className="text-gray-600 dark:text-zinc-500 text-sm max-w-xl mx-auto">
                   Swap assets, create payment links, or scout yields with AI assistance
                 </p>
               </motion.div>
@@ -841,7 +841,7 @@ export default function TerminalPage() {
                           <div className={`max-w-[85%]`}>
                             {msg.role === 'user' ? (
                               <motion.div 
-                                className="bg-gradient-to-r from-cyan-600 to-blue-600 text-white px-5 py-3.5 rounded-2xl rounded-tr-none shadow-lg shadow-cyan-900/20 text-sm font-medium relative overflow-hidden"
+                                className="bg-gradient-to-r from-cyan-600 to-blue-600 text-white px-5 py-3.5 rounded-2xl rounded-tr-none shadow-lg shadow-cyan-500/20 dark:shadow-cyan-900/20 text-sm font-medium relative overflow-hidden"
                                 whileHover={{ scale: 1.02 }}
                                 transition={{ duration: 0.2 }}
                               >
@@ -857,7 +857,7 @@ export default function TerminalPage() {
                             ) : (
                               <div className="space-y-3">
                                 <motion.div 
-                                  className="bg-gradient-to-br from-zinc-900/80 to-zinc-800/50 border border-zinc-700/50 text-gray-200 px-5 py-4 rounded-2xl rounded-tl-none text-sm leading-relaxed backdrop-blur-xl relative overflow-hidden group"
+                                  className="bg-gradient-to-br from-gray-50 to-gray-100 dark:from-zinc-900/80 dark:to-zinc-800/50 border border-gray-200 dark:border-zinc-700/50 text-gray-800 dark:text-gray-200 px-5 py-4 rounded-2xl rounded-tl-none text-sm leading-relaxed backdrop-blur-xl relative overflow-hidden group"
                                   whileHover={{ scale: 1.01 }}
                                   transition={{ duration: 0.2 }}
                                 >
@@ -866,7 +866,11 @@ export default function TerminalPage() {
                                   
                                   <div className="relative z-10">
                                     {msg.type === 'message' && <div className="whitespace-pre-line">{msg.content}</div>}
-                                    {msg.type === 'yield_info' && <div className="font-mono text-xs text-cyan-300 bg-cyan-950/30 p-3 rounded-lg border border-cyan-800/30">{msg.content}</div>}
+                                    {msg.type === 'yield_info' && (
+                                      <div className="font-mono text-xs text-cyan-700 dark:text-cyan-300 bg-cyan-50 dark:bg-cyan-950/30 p-3 rounded-lg border border-cyan-200 dark:border-cyan-800/30">
+                                        {msg.content}
+                                      </div>
+                                    )}
                                     {msg.type === 'intent_confirmation' && msg.data && 'parsedCommand' in msg.data && (
                                       <IntentConfirmation command={msg.data.parsedCommand} onConfirm={handleIntentConfirm} />
                                     )}
@@ -878,7 +882,7 @@ export default function TerminalPage() {
                                         href={msg.data.url} 
                                         target="_blank" 
                                         rel="noopener noreferrer" 
-                                        className="text-cyan-400 hover:text-cyan-300 underline underline-offset-2 flex items-center gap-2 group"
+                                        className="text-cyan-600 dark:text-cyan-400 hover:text-cyan-700 dark:hover:text-cyan-300 underline underline-offset-2 flex items-center gap-2 group"
                                         whileHover={{ x: 4 }}
                                       >
                                         <span>{msg.data.url}</span>
@@ -895,7 +899,7 @@ export default function TerminalPage() {
                               </div>
                             )}
                             <p
-                              className={`text-[10px] text-zinc-600 mt-2 px-1 ${msg.role === 'user' ? 'text-right' : 'text-left'}`}
+                              className={`text-[10px] text-gray-500 dark:text-zinc-600 mt-2 px-1 ${msg.role === 'user' ? 'text-right' : 'text-left'}`}
                             >
                               {formatTime(msg.timestamp)}
                             </p>

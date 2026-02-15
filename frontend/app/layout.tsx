@@ -8,8 +8,11 @@ const inter = Inter({ subsets: ['latin'] })
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className="dark">
-      <body className={`${inter.className} bg-[#050505] text-white min-h-screen selection:bg-blue-500/30`}>
+    <html lang="en">
+      <body
+        className={`${inter.className} min-h-screen selection:bg-blue-500/30`}
+        style={{ backgroundColor: 'rgb(var(--background))', color: 'rgb(var(--foreground))' }}
+      >
         {/* Animated Background Mesh */}
         <div className="fixed inset-0 z-[-1]">
           <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-blue-600/10 blur-[120px]" />
