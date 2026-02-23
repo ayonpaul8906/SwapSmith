@@ -6,21 +6,11 @@ import Link from 'next/link';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import {
-  Shield,
-  Rocket,
   Layers,
   Sparkles,
-  Trophy,
   Star,
   GitFork,
   AlertCircle,
-  ExternalLink,
-  Gift,
-  Zap,
-  BookOpen,
-  MessageSquare,
-  Wallet,
-  Clock,
   ArrowRight,
   Github,
   Code2,
