@@ -39,7 +39,10 @@ export const conversations = pgTable('conversations', {
   telegramId: bigint('telegram_id', { mode: 'number' }).notNull().unique(),
   state: text('state'),
   lastUpdated: timestamp('last_updated'),
-});
+}, (table) => [
+  index("idx_conversations_telegram_id").on(table.telegramId),
+]);
+
 
 export const orders = pgTable('orders', {
   id: serial('id').primaryKey(),
@@ -59,7 +62,9 @@ export const orders = pgTable('orders', {
   createdAt: timestamp('created_at').defaultNow(),
 }, (table) => [
   index('orders_status_idx').on(table.status),
+  index("idx_orders_telegram_id").on(table.telegramId),
 ]);
+
 
 
 export const checkouts = pgTable('checkouts', {
@@ -134,7 +139,10 @@ export const limitOrders = pgTable('limit_orders', {
   sideshiftOrderId: text('sideshift_order_id'),
   error: text('error'),
   executedAt: timestamp('executed_at'),
-});
+}, (table) => [
+  index("idx_limit_orders_telegram_id").on(table.telegramId),
+]);
+
 
 // --- SHARED SCHEMAS (used by both bot and frontend) ---
 
@@ -165,7 +173,10 @@ export const userSettings = pgTable('user_settings', {
   telegramNotifications: text('telegram_notifications'),
   updatedAt: timestamp('updated_at').notNull().defaultNow(),
   createdAt: timestamp('created_at').defaultNow(),
-});
+}, (table) => [
+  index("idx_user_settings_user_id").on(table.userId),
+]);
+
 
 // --- WATCHLIST SCHEMA ---
 
@@ -200,7 +211,10 @@ export const swapHistory = pgTable('swap_history', {
   txHash: text('tx_hash'),
   createdAt: timestamp('created_at').defaultNow(),
   updatedAt: timestamp('updated_at'),
-});
+}, (table) => [
+  index("idx_swap_history_user_id").on(table.userId),
+]);
+
 
 export const chatHistory = pgTable('chat_history', {
   id: serial('id').primaryKey(),
@@ -211,7 +225,10 @@ export const chatHistory = pgTable('chat_history', {
   metadata: text('metadata'),
   sessionId: text('session_id'),
   createdAt: timestamp('created_at').defaultNow(),
-});
+}, (table) => [
+  index("idx_chat_history_user_id").on(table.userId),
+]);
+
 
 export const discussions = pgTable('discussions', {
   id: serial('id').primaryKey(),
@@ -245,7 +262,9 @@ export const courseProgress = pgTable('course_progress', {
   updatedAt: timestamp('updated_at').notNull().defaultNow(),
 }, (table) => ({
   userCourseUnique: unique('course_progress_user_course_unique').on(table.userId, table.courseId),
+  userIdIdx: index("idx_course_progress_user_id").on(table.userId),
 }));
+
 
 export const rewardsLog = pgTable('rewards_log', {
   id: uuid('id').primaryKey().defaultRandom(),
@@ -261,7 +280,10 @@ export const rewardsLog = pgTable('rewards_log', {
   claimedAt: timestamp('claimed_at'),
   createdAt: timestamp('created_at').notNull().defaultNow(),
   updatedAt: timestamp('updated_at').notNull().defaultNow(),
-});
+}, (table) => [
+  index("idx_rewards_log_user_id").on(table.userId),
+]);
+
 
 // --- RELATIONS ---
 
