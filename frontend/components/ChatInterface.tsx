@@ -183,24 +183,14 @@ export default function ChatInterface() {
       }
 
     } catch (error) {
-<<<<<<< HEAD
-      const errorMessage = handleError(error, ErrorType.VOICE_ERROR, {
+      const errorMessage = handleError(error, ErrorType.VOICE_ERROR, { 
         operation: 'voice_transcription',
-        retryable: true
+        retryable: true 
       });
       setMessages(prev => prev.filter(m => m.content !== '🎤 [Sending Voice...]'));
       addMessage({ role: 'assistant', content: errorMessage, type: 'message' });
       setIsLoading(false);
-=======
-        const errorMessage = handleError(error, ErrorType.VOICE_ERROR, { 
-          operation: 'voice_transcription',
-          retryable: true 
-        });
-        setMessages(prev => prev.filter(m => m.content !== '🎤 [Sending Voice...]'));
-        addMessage({ role: 'assistant', content: errorMessage, type: 'message' });
-        setIsLoading(false);
-        inputRef.current?.focus();
->>>>>>> e926bdf90d7ee73e765cf2b962e13cf46b8e8bd0
+      inputRef.current?.focus();
     }
   };
 

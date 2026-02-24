@@ -15,7 +15,7 @@ export interface UseAudioRecorderReturn {
   isRecording: boolean;
   isSupported: boolean;
   startRecording: () => Promise<void>;
-  stopRecording: () => Promise<Blob | null>;
+  stopRecording: () => Promise<Blob | string | null>;
   error: string | null;
   browserInfo: {
     browser: string;
@@ -337,8 +337,8 @@ class AudioRecorderPolyfill {
 
     const hasMedia = !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia);
     const hasMediaRecorder = !!(typeof window !== 'undefined' && window.MediaRecorder);
-    const hasAudioContext = !!(typeof window !== 'undefined' && (window.AudioContext || (window as any).webkitAudioContext));
-    const hasSpeech = !!(typeof window !== 'undefined' && ((window as any).SpeechRecognition || (window as any).webkitSpeechRecognition));
+    const hasAudioContext = !!(typeof window !== 'undefined' && (window.AudioContext || window.webkitAudioContext));
+    const hasSpeech = !!(typeof window !== 'undefined' && (window.SpeechRecognition || (window as any).webkitSpeechRecognition));
 
     return hasMedia || hasSpeech;
   }
@@ -422,7 +422,7 @@ export const useAudioRecorder = (config: AudioRecorderConfig = {}): UseAudioReco
     }
   }, [isSupported, isRecording, config]);
 
-  const stopRecording = useCallback(async (): Promise<Blob | null> => {
+  const stopRecording = useCallback(async (): Promise<Blob | string | null> => {
     if (!isRecording || !polyfillRef.current) {
       return null;
     }

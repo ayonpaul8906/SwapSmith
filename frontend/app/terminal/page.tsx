@@ -445,8 +445,6 @@ export default function TerminalPage() {
 
   if (!isAuthenticated) return null;
 
-<<<<<<< HEAD
-<<<<<<< HEAD
   /* ------------------------------------------------------------------------ */
 
   /* ------------------------------------------------------------------------ */
@@ -585,10 +583,6 @@ export default function TerminalPage() {
 
   /* ------------------------------------------------------------------------ */
 
-=======
->>>>>>> c5d084631228a04f2746db4475bc9a9b158820fd
-=======
->>>>>>> c5d084631228a04f2746db4475bc9a9b158820fd
   return (
     <>
       <Navbar />
@@ -712,37 +706,17 @@ export default function TerminalPage() {
                         msg.data &&
                         "quoteData" in msg.data ? (
                         <SwapConfirmation
-<<<<<<< HEAD
-<<<<<<< HEAD
                           quote={msg.data.quoteData as QuoteData}
                           confidence={msg.data.confidence as number}
                           onRequote={handleRequote}
-=======
-                          quote={(msg.data as { quoteData: QuoteData }).quoteData}
-                          confidence={(msg.data as { confidence: number }).confidence}
->>>>>>> c5d084631228a04f2746db4475bc9a9b158820fd
-=======
-                          quote={(msg.data as { quoteData: QuoteData }).quoteData}
-                          confidence={(msg.data as { confidence: number }).confidence}
->>>>>>> c5d084631228a04f2746db4475bc9a9b158820fd
                         />
                       ) : msg.type === "intent_confirmation" &&
                         msg.data &&
                         "parsedCommand" in msg.data ? (
                         /* Note: Intent confirmation callback logic omitted for brevity in this task, but rendering is here */
                         <IntentConfirmation
-<<<<<<< HEAD
-<<<<<<< HEAD
-                          command={msg.data.parsedCommand as ParsedCommand}
-                          onConfirm={() => { }}
-=======
                           command={(msg.data as { parsedCommand: ParsedCommand }).parsedCommand}
                           onConfirm={() => executeSwap((msg.data as { parsedCommand: ParsedCommand }).parsedCommand)}
->>>>>>> c5d084631228a04f2746db4475bc9a9b158820fd
-=======
-                          command={(msg.data as { parsedCommand: ParsedCommand }).parsedCommand}
-                          onConfirm={() => executeSwap((msg.data as { parsedCommand: ParsedCommand }).parsedCommand)}
->>>>>>> c5d084631228a04f2746db4475bc9a9b158820fd
                         />
                       ) : msg.type === "yield_info" ? (
                         <pre className="whitespace-pre-wrap text-xs text-cyan-400">
@@ -774,8 +748,6 @@ export default function TerminalPage() {
 
           <div className="p-4 border-t border-[var(--border)] bg-[var(--panel)]/90 backdrop-blur">
             <ClaudeChatInput
-<<<<<<< HEAD
-<<<<<<< HEAD
               onSendMessage={({ message }) => {
                 addMessage({
                   role: "user",
@@ -784,22 +756,10 @@ export default function TerminalPage() {
                 });
                 processCommand(message);
               }}
-              isRecording={false}
-              isAudioSupported={false}
-              onStartRecording={() => { }}
-              onStopRecording={() => { }}
-=======
-=======
->>>>>>> c5d084631228a04f2746db4475bc9a9b158820fd
-              onSendMessage={({ message }) => processCommand(message)}
               isRecording={isRecording}
               isAudioSupported={isAudioSupported}
               onStartRecording={handleStartRecording}
               onStopRecording={handleStopRecording}
-<<<<<<< HEAD
->>>>>>> c5d084631228a04f2746db4475bc9a9b158820fd
-=======
->>>>>>> c5d084631228a04f2746db4475bc9a9b158820fd
               isConnected={isConnected}
             />
           </div>
