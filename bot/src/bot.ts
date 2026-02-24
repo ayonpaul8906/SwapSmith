@@ -92,8 +92,9 @@ const orderMonitor = new OrderMonitor({
         parse_mode: 'Markdown',
       });
     } catch (e) {
-      logger.error('Order update notify failed:', e);
+      handleError('OrderUpdateNotifyFailed', e, { from: { id: telegramId } });
     }
+
   },
 });
 
@@ -255,6 +256,7 @@ async function handleTextMessage(
   }
 
 bot.action(/deposit_(.+)/, async (ctx) => {
+
   const poolId = ctx.match[1];
 
   await ctx.answerCbQuery();
@@ -357,17 +359,13 @@ bot.action('confirm_portfolio', async (ctx) => {
       await db.setConversationState(userId, { parsedCommand: parsed });
       return ctx.reply('Please provide the destination wallet address.');
     }
-
-    await db.setConversationState(userId, { parsedCommand: parsed });
-
-    return ctx.reply(
-      'Confirm Limit Order?',
-      Markup.inlineKeyboard([
-        Markup.button.callback('✅ Yes', 'confirm_limit_order'),
-        Markup.button.callback('❌ Cancel', 'cancel_swap'),
-      ])
-    );
+  } catch (error) {
+    handleError('PortfolioExecutionFailed', error, ctx);
+    ctx.editMessageText('❌ Failed to execute portfolio strategy.');
+  } finally {
+    await db.clearConversationState(userId);
   }
+});
 
   if (['swap', 'checkout'].includes(parsed.intent)) {
     if (!parsed.settleAddress) {
@@ -439,10 +437,7 @@ async function start() {
     process.once('SIGINT', () => shutdown('SIGINT'));
     process.once('SIGTERM', () => shutdown('SIGTERM'));
   } catch (e) {
-    logger.error('Startup failed', e);
-    if (process.env.SENTRY_DSN) {
-      Sentry.captureException(e);
-    }
+    handleError('StartupFailed', e);
     process.exit(1);
   }
 }
