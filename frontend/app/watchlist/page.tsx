@@ -1,7 +1,7 @@
 'use client';
 
-import { WatchlistContainer } from '@/components/watchlist';
 import Navbar from '@/components/Navbar';
+import WatchlistContainer from '@/components/watchlist/WatchlistContainer';
 
 export default function WatchlistPage() {
   return (
