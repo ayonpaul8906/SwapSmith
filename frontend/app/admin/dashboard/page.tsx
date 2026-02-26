@@ -223,10 +223,10 @@ export default function AdminDashboardPage() {
       {/* ── Top nav ────────────────────────────────────────────────────── */}
       <nav style={{ background: '#0b0b18', borderBottom: '1px solid #18182a', padding: '14px 32px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', position: 'sticky', top: 0, zIndex: 50 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-          <div style={{ background: 'linear-gradient(135deg, #2563eb 0%, #7c3aed 100%)', borderRadius: 8, padding: 6 }}>
-            <ShieldCheck size={20} color="white" />
+          <div className="bg-blue-600 p-2 rounded-xl shadow-lg shadow-blue-500/20 flex items-center justify-center" style={{ width: 36, height: 36 }}>
+            <Zap className="w-5 h-5 text-white" fill="white" />
           </div>
-          <span style={{ fontSize: 18, fontWeight: 700 }}>SwapSmith Admin</span>
+          <span className="font-black text-lg uppercase tracking-tighter text-zinc-900 dark:text-white" style={{ letterSpacing: '-0.04em', fontSize: 18 }}>SwapSmith</span>
           <span style={{ background: '#1e3a5f', color: '#93c5fd', border: '1px solid #2563eb44', borderRadius: 20, fontSize: 11, padding: '2px 10px', marginLeft: 4, fontWeight: 600 }}>
             {adminInfo?.role?.replace('_', ' ').toUpperCase()}
           </span>
