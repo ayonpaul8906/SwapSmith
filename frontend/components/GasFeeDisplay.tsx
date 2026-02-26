@@ -14,7 +14,9 @@ interface GasEstimate {
   confidence: number;
   source: string;
   formatted?: string;
+  timestamp: string;
 }
+
 
 interface GasPrediction {
   predictedPrice: string;
