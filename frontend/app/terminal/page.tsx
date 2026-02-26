@@ -27,7 +27,6 @@ import { useTerminalFullPageAd } from "@/hooks/useAds";
 import { useChatHistory, useChatSessions } from "@/hooks/useCachedData";
 import { useErrorHandler, ErrorType } from "@/hooks/useErrorHandler";
 import { useAudioRecorder } from "@/hooks/useAudioRecorder";
-// ...existing code...
 import { usePlan } from "@/hooks/usePlan";
 
 import { ParsedCommand } from "@/utils/groq-client";
@@ -134,7 +133,6 @@ const LiveStatsCard = () => {
 /* -------------------------------------------------------------------------- */
 
 export default function TerminalPage() {
-  const router = useRouter();
   const { address, isConnected } = useAccount();
   const { handleError } = useErrorHandler();
 
