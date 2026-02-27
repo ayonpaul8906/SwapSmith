@@ -6,7 +6,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import * as os from 'os';
 import axios from 'axios';
-import { execFile } from 'child_process';
+import { spawn } from 'child_process';
 import express from 'express';
 import { sql } from 'drizzle-orm';
 import { transcribeAudio, ParsedCommand } from './services/groq-client';
@@ -163,9 +163,17 @@ bot.on(message('voice'), async (ctx) => {
     const res = await axios.get(fileLink.href, { responseType: 'arraybuffer' });
     fs.writeFileSync(oga, res.data);
 
-    await new Promise<void>((resolve, reject) =>
-      execFile('ffmpeg', ['-i', oga, mp3, '-y'], (e) => (e ? reject(e) : resolve()))
-    );
+    await new Promise<void>((resolve, reject) => {
+      const ffmpeg = spawn('ffmpeg', ['-i', oga, mp3, '-y']);
+      ffmpeg.on('close', (code) => {
+        if (code === 0) {
+          resolve();
+        } else {
+          reject(new Error(`FFmpeg exited with code ${code}`));
+        }
+      });
+      ffmpeg.on('error', reject);
+    });
 
     const text = await transcribeAudio(mp3);
     await handleTextMessage(ctx, text, 'voice');
@@ -485,33 +493,35 @@ bot.action('confirm_trailing_stop', async (ctx) => {
   try {
     await ctx.answerCbQuery('Creating trailing stop order...');
 
-    const order =
-      await trailingStopWorker.createTrailingStopOrder({
-        telegramId: userId,
-        fromAsset: fromAsset!,
-        fromNetwork: 'ethereum',
-        toAsset: toAsset!,
-        toNetwork: 'ethereum',
-        fromAmount: amount.toString(),
-        trailingPercentage,
-        settleAddress: settleAddress!,
-      });
+    const order = await trailingStopWorker.createTrailingStopOrder({
+      telegramId: userId,
+      fromAsset: fromAsset!,
+      fromNetwork: 'ethereum',
+      toAsset: toAsset!,
+      toNetwork: 'ethereum',
+      fromAmount: amount.toString(),
+      trailingPercentage,
+      settleAddress: settleAddress!,
+    });
 
-    ctx.editMessageText(
+    await ctx.editMessageText(
       `✅ *Trailing Stop Order Created!*\n\n` +
-        `Order ID: \`${order.id}\`\n` +
-        `Asset: ${order.fromAsset}\n` +
-        `Amount: ${order.fromAmount}\n` +
-        `Trailing: ${order.trailingPercentage}%\n` +
-        `Status: ${order.status}`,
+        `*Order ID:* \`${order.id}\`\n` +
+        `*Asset:* ${order.fromAsset}\n` +
+        `*Amount:* ${order.fromAmount}\n` +
+        `*Trailing:* ${order.trailingPercentage}%\n` +
+        `*Status:* ${order.status}\n\n` +
+        `The order is now active and monitoring prices.`,
       { parse_mode: 'Markdown' }
     );
   } catch (error) {
     const message =
       error instanceof Error ? error.message : 'Unknown error';
+
     logger.error('TrailingStopFailed', { userId, error: message });
-    ctx.editMessageText(
-      `❌ Failed to create trailing stop order: ${message}`
+
+    await ctx.editMessageText(
+      `❌ Failed to create trailing stop order:\n${message}`
     );
   } finally {
     await db.clearConversationState(userId);
