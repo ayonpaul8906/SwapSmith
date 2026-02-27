@@ -11,6 +11,20 @@ jest.mock('../groq-client', () => ({
     })
 }));
 
+jest.mock('../logger', () => ({
+    info: jest.fn(),
+    error: jest.fn(),
+    warn: jest.fn(),
+    debug: jest.fn(),
+    default: {
+        info: jest.fn(),
+        error: jest.fn(),
+        warn: jest.fn(),
+        debug: jest.fn()
+    }
+}));
+
+
 import { parseUserCommand } from '../parseUserCommand';
 
 console.error("TEST_STARTING");
