@@ -21,6 +21,7 @@ import {
   Wallet,
   ExternalLink,
   Loader2,
+  AlertCircle
 } from 'lucide-react'
 import { useAuth } from '@/hooks/useAuth'
 import { useAccount } from 'wagmi'
