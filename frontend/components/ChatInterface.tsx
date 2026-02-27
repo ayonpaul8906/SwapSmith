@@ -73,9 +73,13 @@ export default function ChatInterface() {
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [pendingCommand, setPendingCommand] = useState<ParsedCommand | null>(null);
+  const [currentConfidence, setCurrentConfidence] = useState(0);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const hasLoadedPersistenceRef = useRef(false);
+  const saveSequenceRef = useRef(0);
+  const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const { address, isConnected } = useAccount();
   const { user, isAuthenticated, isLoading: isAuthLoading } = useAuth();
   const { handleError } = useErrorHandler();
@@ -673,7 +677,12 @@ export default function ChatInterface() {
       confidence: 100, // High confidence as it comes from a button click
       requiresConfirmation: false,
       success: true,
-      validationErrors: []
+      validationErrors: [],
+      settleAsset: oldQuote.depositCoin,
+      settleNetwork: oldQuote.depositNetwork,
+      settleAmount: oldQuote.settleAmount,
+      settleAddress: '',
+      parsedMessage: ''
     };
 
     addMessage({
@@ -720,17 +729,6 @@ export default function ChatInterface() {
                 <div className="space-y-3">
                   <div className="bg-white/[0.04] border border-white/10 text-gray-200 px-5 py-4 rounded-2xl rounded-tl-none text-sm leading-relaxed backdrop-blur-sm">
                     {msg.type === 'message' && <div className="whitespace-pre-line">{msg.content}</div>}
-                    {msg.type === 'portfolio_summary' && (
-                        <div>
-                          <div className="whitespace-pre-line mb-3">{msg.content}</div>
-                          {msg.data?.portfolioItems && msg.data?.parsedCommand && (
-                            <PortfolioSummary 
-                                items={msg.data.portfolioItems} 
-                                onRetry={(failedItems) => handlePortfolioRetry(failedItems, msg.data!.parsedCommand!)} 
-                            />
-                          )}
-                        </div>
-                    )}
                     {msg.type === 'yield_info' && <div className="font-mono text-xs text-blue-300">{msg.content}</div>}
 
                     {/* Inject your Custom Components (SwapConfirmation etc) here */}
@@ -739,7 +737,6 @@ export default function ChatInterface() {
                       <SwapConfirmation
                         quote={msg.data.quoteData}
                         confidence={msg.data.confidence}
-                        onRequote={handleRequote}
                       />
                     )}
                   </div>
