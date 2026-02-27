@@ -2,10 +2,11 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
+import Image from 'next/image'
 import { auth } from '@/lib/firebase'
 import { signOut } from 'firebase/auth'
 import {
-  Users, Search, ShieldCheck, LogOut, RefreshCw, BarChart2,
+  Users, Search, LogOut, RefreshCw, BarChart2,
   AlertTriangle, CheckCircle2, Ban, Flag, Eye,
   ChevronLeft, ChevronRight, ArrowLeftRight, Clock, X, Menu,
   ShieldAlert, ShieldOff, Unlock, Lock,
@@ -486,9 +487,7 @@ export default function AdminUsersPage() {
       }}>
         {/* Brand */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexShrink: 0 }}>
-          <div style={{ background: 'linear-gradient(135deg, #2563eb 0%, #7c3aed 100%)', borderRadius: 8, padding: 6 }}>
-            <ShieldCheck size={20} color="white" />
-          </div>
+          <Image src="/swapsmithicon.png" alt="SwapSmith" width={36} height={36} style={{ borderRadius: 8 }} unoptimized />
           <span className="admin-nav-label" style={{ fontSize: 18, fontWeight: 700 }}>SwapSmith Admin</span>
           <span style={{ background: '#1e3a5f', color: '#93c5fd', border: '1px solid #2563eb44', borderRadius: 20, fontSize: 11, padding: '2px 10px', marginLeft: 4, fontWeight: 600 }}>
             {adminInfo?.role?.replace('_', ' ').toUpperCase()}
@@ -554,9 +553,7 @@ export default function AdminUsersPage() {
             {/* Drawer header */}
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                <div style={{ background: 'linear-gradient(135deg, #2563eb 0%, #7c3aed 100%)', borderRadius: 8, padding: 6 }}>
-                  <ShieldCheck size={18} color="white" />
-                </div>
+                <Image src="/swapsmithicon.png" alt="SwapSmith" width={32} height={32} style={{ borderRadius: 8 }} unoptimized />
                 <span style={{ fontSize: 16, fontWeight: 700 }}>SwapSmith Admin</span>
               </div>
               <button onClick={() => setMobileNavOpen(false)} style={{ background: '#18181b', border: '1px solid #27272a', color: '#a1a1aa', borderRadius: 8, padding: 6, cursor: 'pointer' }}>
