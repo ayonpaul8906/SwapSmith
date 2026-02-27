@@ -121,6 +121,17 @@ bot.command('yield', async (ctx) => {
   }
 });
 
+bot.command('market', async (ctx) => {
+  await ctx.reply('📊 Fetching market intelligence...');
+  try {
+    const marketData = await getMarketData();
+    const message = formatMarketMessage(marketData);
+    ctx.replyWithMarkdown(message);
+  } catch {
+    ctx.reply('❌ Failed to fetch market data.');
+  }
+});
+
 
 bot.command('clear', async (ctx) => {
   if (ctx.from) {
@@ -342,13 +353,18 @@ bot.action('confirm_portfolio', async (ctx) => {
   }
 
   try {
-    await ctx.answerCbQuery('Processing...');
-    await executePortfolioStrategy(userId, state.parsedCommand);
+<<<<<<< HEAD
+    await ctx.answerCbQuery('Executing portfolio strategy...');
+    const result = await executePortfolioStrategy(userId, {
+      fromAsset,
+      fromChain,
+      .join('\n');
 
-    ctx.editMessageText('✅ Portfolio strategy executed successfully!');
+    ctx.editMessageText(`✅ Portfolio strategy executed successfully!\n\n${summary}`);
   } catch (error) {
-    logger.error('Portfolio execution error:', error);
-    ctx.editMessageText('❌ Failed to execute portfolio strategy.');
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    logger.error('Portfolio execution error:', { userId, error: errorMessage });
+    ctx.editMessageText(`❌ Portfolio execution failed: ${errorMessage}`);
   } finally {
     await db.clearConversationState(userId);
   }
@@ -358,10 +374,11 @@ bot.action('confirm_portfolio', async (ctx) => {
     if (!parsed.settleAddress) {
       await db.setConversationState(userId, { parsedCommand: parsed });
       return ctx.reply('Please provide the destination wallet address.');
+>>>>>>> b4738f491ddf4e939a8e40c1646b63af7dfa03de
     }
+
   } catch (error) {
     handleError('PortfolioExecutionFailed', error, ctx);
-    ctx.editMessageText('❌ Failed to execute portfolio strategy.');
   } finally {
     await db.clearConversationState(userId);
   }
