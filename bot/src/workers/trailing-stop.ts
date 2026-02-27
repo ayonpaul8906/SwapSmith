@@ -71,12 +71,13 @@ export class TrailingStopWorker {
       for (const order of activeOrders) {
         const currentPrice = prices[order.fromAsset.toUpperCase()];
 
-        if (currentPrice === undefined) {
+        if (currentPrice === undefined || currentPrice === null) {
           logger.warn(`⚠️ No price found for ${order.fromAsset}, skipping order ${order.id}`);
           continue;
         }
 
         await this.processTrailingStopOrder(order, currentPrice);
+
       }
 
     } catch (error) {
@@ -189,9 +190,10 @@ export class TrailingStopWorker {
         order.fromNetwork || 'ethereum',
         order.toAsset,
         order.toNetwork || 'ethereum',
-        order.fromAmount,
+        parseFloat(order.fromAmount),
         process.env.SIDESHIFT_CLIENT_IP || '127.0.0.1'
       );
+
 
       if (quote.error) {
         throw new Error(`Quote error: ${quote.error.message}`);
@@ -213,11 +215,16 @@ export class TrailingStopWorker {
         .where(eq(trailingStopOrders.id, order.id));
 
       // Notify user of success
+      const depositAddress = typeof sideshiftOrder.depositAddress === 'string' 
+        ? sideshiftOrder.depositAddress 
+        : sideshiftOrder.depositAddress?.address || '';
+      
       const successMessage = `✅ *Trailing Stop Executed!*\n\n` +
         `Order ID: \`${sideshiftOrder.id}\`\n` +
-        `Deposit: ${quote.depositAmount} ${quote.depositCoin} to \`${quote.depositAddress}\`\n` +
+        `Deposit: ${quote.depositAmount} ${quote.depositCoin} to \`${depositAddress}\`\n` +
         `Receive: ${sideshiftOrder.settleAmount} ${sideshiftOrder.settleCoin}\n\n` +
         `Please complete the transaction by sending funds to the deposit address.`;
+
 
       if (this.bot && order.telegramId) {
         await this.bot.telegram.sendMessage(Number(order.telegramId), successMessage, { parse_mode: 'Markdown' });
