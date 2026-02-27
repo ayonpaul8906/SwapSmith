@@ -1,165 +1,62 @@
 'use client';
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
+import Link from 'next/link';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
-import { Shield, Rocket, Layers, Sparkles } from 'lucide-react';
+import {
+  Layers,
+  Sparkles,
+  Star,
+  GitFork,
+  AlertCircle,
+  ArrowRight,
+  Github,
+  Code2,
+  Users,
+  Terminal,
+} from 'lucide-react';
 
-/* ============================= */
+/* ================================================================ */
+/* Static Data                                                     */
+/* ================================================================ */
 
+const REPO_STATS = [
+  { label: "Stars", value: "3", icon: Star, color: "text-amber-500" },
+  { label: "Forks", value: "22", icon: GitFork, color: "text-blue-500" },
+  { label: "Issues", value: "54", icon: AlertCircle, color: "text-red-500" },
+  { label: "Lang", value: "TS", icon: Code2, color: "text-indigo-500" },
+];
 
-
-interface GlassCardProps {
-  children: React.ReactNode;
-  title?: React.ReactNode;
-  icon?: React.ReactNode;
-  className?: string;
-}
-
-interface FeatureListProps {
-  items: string[];
-}
-
-
-/*         About Page            */
-
-
-export default function AboutPage() {
-  return (
-    <>
-      <Navbar />
-
-      <div
-        className="relative min-h-screen overflow-hidden 
-        bg-[radial-gradient(circle_at_20%_20%,rgba(124,58,237,0.35),transparent_40%),
-        radial-gradient(circle_at_80%_30%,rgba(34,211,238,0.25),transparent_40%),
-        radial-gradient(circle_at_50%_80%,rgba(37,99,235,0.25),transparent_50%)]
-        bg-gradient-to-br from-[#0B1120] via-[#111827] to-[#1E1B4B]
-        pt-32 pb-24 px-6"
-      >
-        <motion.main
-          initial={{ opacity: 0, y: 40 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8 }}
-          className="max-w-5xl mx-auto"
-        >
-          {/* Page Title */}
-          <h1
-            className="text-5xl md:text-6xl font-extrabold mb-12 text-center
-            bg-gradient-to-r from-cyan-400 via-blue-500 to-violet-500
-            bg-clip-text text-transparent drop-shadow-xl"
-          >
-            About SwapSmith
-          </h1>
-
-          {/* Grid Sections */}
-          <div className="grid md:grid-cols-2 gap-12">
-
-            <GlassCard icon={<Sparkles size={22} />} title="Key Features">
-              <FeatureList
-                items={[
-                  "Real-time crypto price tracking and analytics",
-                  "Automated DCA (Dollar Cost Averaging) scheduler",
-                  "Integrated wallet connection and management",
-                  "Secure and fast swap functionality",
-                  "Contextual help and user guidance",
-                  "Notifications and yield tracking",
-                  "Voice command and transcription support",
-                  "Modern, responsive frontend with Next.js",
-                ]}
-              />
-            </GlassCard>
-
-            <GlassCard icon={<Layers size={22} />} title="Architecture & Technologies">
-              <FeatureList
-                items={[
-                  "Frontend: Next.js, React, Tailwind CSS",
-                  "Backend: Node.js services for trading logic",
-                  "Database: Drizzle ORM and SQL",
-                  "APIs: Blockchain explorers and price feeds",
-                  "Dockerized deployment for scalability",
-                ]}
-              />
-            </GlassCard>
-
-            <GlassCard icon={<Shield size={22} />} title="Security & Privacy">
-              <FeatureList
-                items={[
-                  "Secure operations using industry best practices",
-                  "User data never shared with third parties",
-                  "Wallet connections never store private keys",
-                ]}
-              />
-            </GlassCard>
-
-            <GlassCard icon={<Rocket size={22} />} title="Our Mission">
-              <p className="text-gray-300 leading-relaxed">
-                Our mission is to make crypto trading accessible, transparent,
-                and rewarding for everyone. Whether you are a beginner or an
-                experienced trader, SwapSmith provides the tools and support
-                you need to succeed in the evolving world of digital assets.
-              </p>
-            </GlassCard>
-          </div>
-
-          {/* Contact Section */}
-          <GlassCard className="mt-16">
-            <h2 className="text-2xl font-semibold mb-4 text-white">
-              Contact & Contribution
-            </h2>
-            <p className="text-gray-300 leading-relaxed">
-              SwapSmith is open source and welcomes contributions! For
-              questions, suggestions, or to get involved, please see our{" "}
-              <a
-                href="/CONTRIBUTING.md"
-                className="relative text-violet-400 font-medium group transition-all duration-300 hover:text-cyan-300"
-              >
-                contribution guidelines
-                <span className="absolute left-0 -bottom-1 w-0 h-[2px] bg-gradient-to-r from-violet-400 to-cyan-400 transition-all duration-300 group-hover:w-full"></span>
-              </a>{" "}
-              or contact the team via the project repository.
-            </p>
-          </GlassCard>
-        </motion.main>
-      </div>
-
-      <Footer />
-    </>
-  );
-}
-
-
-/*        Glass Card             */
-
+/* ================================================================ */
+/* Reusable Components                                             */
+/* ================================================================ */
 
 function GlassCard({
   children,
   title,
-  icon,
+  icon: Icon,
   className = "",
-}: GlassCardProps) {
+}: {
+  children: React.ReactNode;
+  title?: string;
+  icon?: any;
+  className?: string;
+}) {
   return (
     <motion.div
-      whileHover={{ y: -8 }}
-      transition={{ type: "spring", stiffness: 200 }}
-      className={`relative backdrop-blur-xl 
-        bg-gradient-to-br from-white/10 via-white/5 to-transparent
-        border border-white/15
-        rounded-3xl p-8 shadow-xl
-        hover:shadow-[0_0_60px_rgba(34,211,238,0.35)]
-        transition-all duration-500 ${className}`}
+      whileHover={{ y: -6 }}
+      className={`glow-card rounded-[2.5rem] p-8 border-primary transition-all duration-500 ${className}`}
     >
       {title && (
         <div className="flex items-center gap-4 mb-6">
-          {icon && (
-            <div className="p-3 rounded-xl bg-gradient-to-r from-cyan-400 via-blue-500 to-violet-500 text-white shadow-lg">
-              {icon}
+          {Icon && (
+            <div className="p-3 bg-secondary rounded-2xl border border-primary">
+              <Icon className="w-5 h-5 text-accent-primary" />
             </div>
           )}
-          <h2 className="text-2xl font-bold text-white tracking-wide">
-            {title}
-          </h2>
+          <h3 className="text-xl font-black text-primary tracking-tighter">{title}</h3>
         </div>
       )}
       {children}
@@ -167,24 +64,132 @@ function GlassCard({
   );
 }
 
-
-/*        Feature List           */
-
-
-function FeatureList({ items }: FeatureListProps) {
+function FeatureList({ items }: { items: string[] }) {
   return (
-    <ul className="space-y-3">
-      {items.map((item, index) => (
-        <li
-          key={index}
-          className="relative pl-6 text-gray-300 hover:text-white transition-all duration-300
-            before:absolute before:left-0 before:top-2
-            before:w-2.5 before:h-2.5 before:rounded-full
-            before:bg-gradient-to-r before:from-violet-400 before:to-cyan-400"
-        >
-          {item}
+    <ul className="space-y-4">
+      {items.map((item, i) => (
+        <li key={i} className="flex items-center gap-3 group">
+          <div className="w-2 h-2 rounded-full bg-accent-primary group-hover:scale-150 transition-transform" />
+          <span className="text-secondary font-medium text-sm group-hover:text-primary transition-colors">
+            {item}
+          </span>
         </li>
       ))}
     </ul>
+  );
+}
+
+/* ================================================================ */
+/* Page Component                                                  */
+/* ================================================================ */
+
+export default function AboutPage() {
+  const [totalCommits, setTotalCommits] = useState(0);
+
+  useEffect(() => {
+    setTotalCommits(390); 
+  }, []);
+
+  return (
+    <>
+      <Navbar />
+
+      <div className="min-h-screen bg-primary pt-32 pb-24 px-6 transition-colors duration-500 relative overflow-hidden">
+        
+        {/* Background Ambient Glows */}
+        <div className="absolute inset-0 pointer-events-none">
+          <div className="absolute top-[-10%] right-[-10%] w-[50%] h-[50%] rounded-full bg-ambient-purple blur-[120px] opacity-20" />
+          <div className="absolute bottom-[-10%] left-[-10%] w-[50%] h-[50%] rounded-full bg-ambient-cyan blur-[120px] opacity-10" />
+        </div>
+
+        <motion.main 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="max-w-6xl mx-auto space-y-16 relative z-10"
+        >
+          {/* Hero Section */}
+          <section className="text-center space-y-6">
+            <h1 className="text-5xl md:text-7xl font-black tracking-tighter text-primary">
+              Forging the <span className="gradient-text">Future</span> of Trading
+            </h1>
+            <p className="text-secondary text-lg font-medium max-w-2xl mx-auto leading-relaxed">
+              SwapSmith is an open-source, AI-augmented terminal designed to bridge the gap between complex blockchain protocols and everyday liquidity.
+            </p>
+          </section>
+
+          {/* Repository Health Stats */}
+          <section className="grid grid-cols-2 md:grid-cols-5 gap-4">
+            {REPO_STATS.map((stat, i) => (
+              <div key={i} className="glass rounded-3xl p-6 border-primary flex flex-col items-center text-center group hover:bg-section-hover transition-colors">
+                <stat.icon className={`w-6 h-6 mb-3 ${stat.color}`} />
+                <div className="text-2xl font-black text-primary tracking-tighter">{stat.value}</div>
+                <div className="text-[10px] font-black uppercase tracking-widest text-muted">{stat.label}</div>
+              </div>
+            ))}
+            <div className="glass rounded-3xl p-6 border-primary flex flex-col items-center text-center group bg-indigo-500/5">
+              <Github className="w-6 h-6 mb-3 text-primary" />
+              <div className="text-2xl font-black text-primary tracking-tighter">{totalCommits}</div>
+              <div className="text-[10px] font-black uppercase tracking-widest text-muted">Commits</div>
+            </div>
+          </section>
+
+          {/* Features & Architecture */}
+          <section className="grid md:grid-cols-2 gap-8">
+            <GlassCard title="Terminal Capabilities" icon={Sparkles}>
+              <FeatureList items={[
+                'Groq-Powered Natural Language Execution',
+                'Cross-Chain Atomic Swap Integration',
+                'Precision DCA Investment Scheduling',
+                'Non-Custodial Wallet Architecture',
+                'Biometric & Hardware Signer Support',
+              ]} />
+            </GlassCard>
+
+            <GlassCard title="Technical Stack" icon={Layers}>
+              <FeatureList items={[
+                'Next.js 14 (App Router) & Framer Motion',
+                'Wagmi / Viem Web3 Middleware',
+                'Tailwind CSS Design System',
+                'Firebase Distributed Database',
+                'Industrial Grade Price Feeds',
+              ]} />
+            </GlassCard>
+          </section>
+
+          {/* Open Source Call to Action */}
+          <section className="text-center">
+            <div className="p-10 glass rounded-[3rem] border-primary border-dashed relative overflow-hidden group">
+              <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-accent-primary via-accent-tertiary to-accent-primary opacity-50" />
+              <Users className="w-12 h-12 text-accent-primary mx-auto mb-6" />
+              <h2 className="text-3xl font-black text-primary tracking-tighter mb-4">Built by 20+ Global Contributors</h2>
+              <p className="text-secondary mb-8 max-w-xl mx-auto font-medium">
+                SwapSmith is 100% community-owned. Our code is peer-reviewed, audited, and open for anyone to improve.
+              </p>
+              
+              <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+                <Link
+                  href="/contributors"
+                  className="btn-primary flex items-center gap-3 px-8 py-4 rounded-2xl font-black uppercase tracking-widest text-sm shadow-xl shadow-blue-500/20 active:scale-95 transition-all"
+                >
+                  <Users className="w-5 h-5" />
+                  Explore Contributors
+                </Link>
+                <a
+                  href="https://github.com/GauravKarakoti/SwapSmith"
+                  target="_blank"
+                  className="flex items-center gap-3 px-8 py-4 rounded-2xl bg-secondary border border-primary text-primary font-black uppercase tracking-widest text-sm hover:bg-section-hover transition-all"
+                >
+                  <Github className="w-5 h-5" />
+                  View Source Code
+                </a>
+              </div>
+            </div>
+          </section>
+
+        </motion.main>
+      </div>
+
+      <Footer />
+    </>
   );
 }

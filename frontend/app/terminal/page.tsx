@@ -18,32 +18,18 @@ import {
 
 import Navbar from "@/components/Navbar";
 import ClaudeChatInput from "@/components/ClaudeChatInput";
-import SwapConfirmation from "@/components/SwapConfirmation";
+import SwapConfirmation, { QuoteData } from "@/components/SwapConfirmation";
 import IntentConfirmation from "@/components/IntentConfirmation";
+import FullPageAd from "@/components/FullPageAd";
+import PlanLimitBanner from "@/components/PlanLimitBanner";
+import { useTerminalFullPageAd } from "@/hooks/useAds";
 
-import { useAuth } from "@/hooks/useAuth";
 import { useChatHistory, useChatSessions } from "@/hooks/useCachedData";
 import { useErrorHandler, ErrorType } from "@/hooks/useErrorHandler";
-import { useSpeechRecognition } from "@/hooks/useSpeechRecognition";
+import { useAudioRecorder } from "@/hooks/useAudioRecorder";
+import { usePlan } from "@/hooks/usePlan";
 
 import { ParsedCommand } from "@/utils/groq-client";
-
-/* -------------------------------------------------------------------------- */
-/* Types                                    */
-/* -------------------------------------------------------------------------- */
-
-interface QuoteData {
-  depositAmount: string;
-  depositCoin: string;
-  depositNetwork: string;
-  rate: string;
-  settleAmount: string;
-  settleCoin: string;
-  settleNetwork: string;
-  memo?: string;
-  expiry?: string;
-  id?: string;
-}
 
 interface Message {
   role: "user" | "assistant";
@@ -132,8 +118,15 @@ const LiveStatsCard = () => {
 export default function TerminalPage() {
   const router = useRouter();
   const { address, isConnected } = useAccount();
-  const { isAuthenticated, isLoading: authLoading, user } = useAuth();
   const { handleError } = useErrorHandler();
+
+  // Plan limits
+  const { status: planStatus, checkTerminalUsage } = usePlan();
+  const [limitBannerVisible, setLimitBannerVisible] = useState(false);
+
+  // Ads — hidden for Premium/Pro users
+  const { showAd, dismiss: dismissAd } = useTerminalFullPageAd();
+  const isAdFree = planStatus?.plan === 'premium' || planStatus?.plan === 'pro';
 
   // State
   const [messages, setMessages] = useState<Message[]>([
@@ -148,7 +141,6 @@ export default function TerminalPage() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [isHistoryLoading, setIsHistoryLoading] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
-  const [pendingCommand, setPendingCommand] = useState<ParsedCommand | null>(null);
 
   // Session Management
   const [currentSessionId, setCurrentSessionId] = useState(crypto.randomUUID());
@@ -158,26 +150,21 @@ export default function TerminalPage() {
 
   // Data Fetching
   const { data: chatSessions, refetch: refetchSessions } = useChatSessions(
-    user?.uid,
+    undefined,
   );
-  const { data: dbChatHistory } = useChatHistory(user?.uid, currentSessionId);
+  const { data: dbChatHistory } = useChatHistory(undefined, currentSessionId);
 
   // Speech Recognition
   const {
-    isListening: isRecording,
-    transcript,
+    isRecording,
     isSupported: isAudioSupported,
     startRecording,
     stopRecording,
-  } = useSpeechRecognition();
+  } = useAudioRecorder();
 
   /* ------------------------------------------------------------------------ */
   /* Effects                                  */
   /* ------------------------------------------------------------------------ */
-
-  useEffect(() => {
-    if (!authLoading && !isAuthenticated) router.push("/login");
-  }, [authLoading, isAuthenticated, router]);
 
   useEffect(() => {
     sessionIdRef.current = currentSessionId;
@@ -209,13 +196,6 @@ export default function TerminalPage() {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  // Handle voice transcript
-  useEffect(() => {
-    if (!isRecording && transcript) {
-      processCommand(transcript);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isRecording, transcript]);
 
   /* ------------------------------------------------------------------------ */
   /* Handlers                                   */
@@ -237,8 +217,35 @@ export default function TerminalPage() {
     startRecording();
   };
 
-  const handleStopRecording = () => {
-    stopRecording();
+  const handleStopRecording = async () => {
+    setIsLoading(true);
+    try {
+      const audioBlob = await stopRecording();
+      if (audioBlob) {
+        const audioFile = new File([audioBlob], "voice_command.wav", { type: audioBlob.type || 'audio/wav' });
+
+        const formData = new FormData();
+        formData.append("file", audioFile);
+
+        const response = await fetch("/api/transcribe", { method: "POST", body: formData });
+        const data = await response.json();
+
+        if (data.error) throw new Error(data.error);
+
+        if (data.text) {
+          processCommand(data.text);
+        }
+      }
+    } catch (err) {
+      console.error("Voice processing failed:", err);
+      addMessage({
+        role: "assistant",
+        content: "Sorry, I couldn't process your voice command. Please try again.",
+        type: "message",
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleNewChat = () => {
@@ -262,11 +269,8 @@ export default function TerminalPage() {
     e: React.MouseEvent,
   ) => {
     e.stopPropagation();
-    if (!user?.uid) return;
-
-    await fetch(`/api/chat/history?userId=${user.uid}&sessionId=${sessionId}`, {
-      method: "DELETE",
-    });
+    // Skip deletion without user ID (demo mode)
+    // In production, would use real user ID
 
     if (sessionId === currentSessionId) handleNewChat();
     refetchSessions();
@@ -309,6 +313,13 @@ export default function TerminalPage() {
 
   const processCommand = async (text: string) => {
     if (!text.trim()) return;
+
+    // Check terminal usage limit before processing
+    const usageCheck = await checkTerminalUsage();
+    if (!usageCheck.allowed) {
+      setLimitBannerVisible(true);
+      return;
+    }
     
     // Add user message first
     addMessage({
@@ -410,7 +421,6 @@ export default function TerminalPage() {
       }
 
       if (command.requiresConfirmation || command.confidence < 80) {
-        setPendingCommand(command);
         addMessage({
           role: "assistant",
           content: "",
@@ -445,8 +455,6 @@ export default function TerminalPage() {
 
   if (!isAuthenticated) return null;
 
-<<<<<<< HEAD
-<<<<<<< HEAD
   /* ------------------------------------------------------------------------ */
 
   /* ------------------------------------------------------------------------ */
@@ -584,14 +592,14 @@ export default function TerminalPage() {
   };
 
   /* ------------------------------------------------------------------------ */
-
-=======
->>>>>>> c5d084631228a04f2746db4475bc9a9b158820fd
-=======
->>>>>>> c5d084631228a04f2746db4475bc9a9b158820fd
   return (
     <>
       <Navbar />
+
+      {/* Full-page plans interstitial — hidden for Premium/Pro users */}
+      {showAd && !isAdFree && (
+        <FullPageAd variant="plans" duration={12000} onDismiss={dismissAd} />
+      )}
 
       <div className="flex h-screen pt-16 app-bg overflow-hidden">
         {/* Sidebar */}
@@ -649,6 +657,37 @@ export default function TerminalPage() {
               </div>
 
               <div className="p-3 border-t border-[var(--border)] bg-[var(--panel-soft)]/70 backdrop-blur">
+                {/* Plan usage mini-display */}
+                {planStatus && (
+                  <div className="mb-3 px-2 py-2 rounded-xl bg-[var(--panel-soft)]/60 border border-[var(--border)]">
+                    <div className="flex items-center justify-between mb-1.5">
+                      <span className="text-[10px] text-[var(--muted)] capitalize font-semibold">
+                        {planStatus.plan} plan
+                      </span>
+                      <Link href="/checkout" className="text-[10px] text-cyan-400 hover:text-cyan-300 transition-colors">
+                        Upgrade
+                      </Link>
+                    </div>
+                    <div className="flex items-center justify-between text-[10px] text-[var(--muted)]">
+                      <span>Terminal</span>
+                      <span>
+                        {planStatus.dailyTerminalCount}/
+                        {planStatus.dailyTerminalLimit === -1 ? '∞' : planStatus.dailyTerminalLimit}
+                      </span>
+                    </div>
+                    <div className="mt-1 h-1 bg-[var(--panel-soft)] rounded-full overflow-hidden">
+                      <div
+                        className={`h-full rounded-full ${planStatus.terminalLimitExceeded ? 'bg-red-500' : 'bg-cyan-500'}`}
+                        style={{
+                          width: planStatus.dailyTerminalLimit === -1
+                            ? '10%'
+                            : `${Math.min((planStatus.dailyTerminalCount / planStatus.dailyTerminalLimit) * 100, 100)}%`,
+                        }}
+                      />
+                    </div>
+                  </div>
+                )}
+
                 <a
                   href="https://t.me/SwapSmithBot"
                   target="_blank"
@@ -679,6 +718,15 @@ export default function TerminalPage() {
 
           <div className="flex-1 overflow-y-auto px-4 py-8">
             <div className="max-w-3xl mx-auto space-y-4">
+              {/* Plan limit banner */}
+              {limitBannerVisible && planStatus && (
+                <PlanLimitBanner
+                  feature="terminal"
+                  currentPlan={planStatus.plan}
+                  onDismiss={() => setLimitBannerVisible(false)}
+                />
+              )}
+
               {/* Header / Hero */}
               <div className="mb-2">
                 <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[var(--panel-soft)]/80 border border-[var(--border)] text-[10px] font-semibold uppercase tracking-[0.18em] text-[var(--muted)]">
@@ -712,37 +760,35 @@ export default function TerminalPage() {
                         msg.data &&
                         "quoteData" in msg.data ? (
                         <SwapConfirmation
-<<<<<<< HEAD
-<<<<<<< HEAD
-                          quote={msg.data.quoteData as QuoteData}
-                          confidence={msg.data.confidence as number}
-                          onRequote={handleRequote}
-=======
                           quote={(msg.data as { quoteData: QuoteData }).quoteData}
                           confidence={(msg.data as { confidence: number }).confidence}
->>>>>>> c5d084631228a04f2746db4475bc9a9b158820fd
-=======
+
                           quote={(msg.data as { quoteData: QuoteData }).quoteData}
                           confidence={(msg.data as { confidence: number }).confidence}
->>>>>>> c5d084631228a04f2746db4475bc9a9b158820fd
+
+                          onAmountChange={(newAmount) => {
+                            // Update the quote with the new amount
+                            const quoteData = (msg.data as { quoteData?: QuoteData })?.quoteData;
+                            if (quoteData) {
+                              const updatedQuote = { ...quoteData, depositAmount: newAmount };
+                              addMessage({
+                                role: 'assistant',
+                                content: `Amount updated to ${newAmount} ${quoteData.depositCoin}. Please review the new swap details.`,
+                                type: 'message'
+                              });
+                            }
+                          }}
                         />
                       ) : msg.type === "intent_confirmation" &&
                         msg.data &&
                         "parsedCommand" in msg.data ? (
                         /* Note: Intent confirmation callback logic omitted for brevity in this task, but rendering is here */
                         <IntentConfirmation
-<<<<<<< HEAD
-<<<<<<< HEAD
                           command={msg.data.parsedCommand as ParsedCommand}
                           onConfirm={() => { }}
-=======
+
                           command={(msg.data as { parsedCommand: ParsedCommand }).parsedCommand}
                           onConfirm={() => executeSwap((msg.data as { parsedCommand: ParsedCommand }).parsedCommand)}
->>>>>>> c5d084631228a04f2746db4475bc9a9b158820fd
-=======
-                          command={(msg.data as { parsedCommand: ParsedCommand }).parsedCommand}
-                          onConfirm={() => executeSwap((msg.data as { parsedCommand: ParsedCommand }).parsedCommand)}
->>>>>>> c5d084631228a04f2746db4475bc9a9b158820fd
                         />
                       ) : msg.type === "yield_info" ? (
                         <pre className="whitespace-pre-wrap text-xs text-cyan-400">
@@ -774,32 +820,11 @@ export default function TerminalPage() {
 
           <div className="p-4 border-t border-[var(--border)] bg-[var(--panel)]/90 backdrop-blur">
             <ClaudeChatInput
-<<<<<<< HEAD
-<<<<<<< HEAD
-              onSendMessage={({ message }) => {
-                addMessage({
-                  role: "user",
-                  content: message,
-                  type: "message",
-                });
-                processCommand(message);
-              }}
-              isRecording={false}
-              isAudioSupported={false}
-              onStartRecording={() => { }}
-              onStopRecording={() => { }}
-=======
-=======
->>>>>>> c5d084631228a04f2746db4475bc9a9b158820fd
               onSendMessage={({ message }) => processCommand(message)}
               isRecording={isRecording}
               isAudioSupported={isAudioSupported}
               onStartRecording={handleStartRecording}
               onStopRecording={handleStopRecording}
-<<<<<<< HEAD
->>>>>>> c5d084631228a04f2746db4475bc9a9b158820fd
-=======
->>>>>>> c5d084631228a04f2746db4475bc9a9b158820fd
               isConnected={isConnected}
             />
           </div>
