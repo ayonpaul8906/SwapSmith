@@ -19,6 +19,8 @@ import { Sentry } from './services/logger';
 
 
 import {
+  createCheckout,
+  createOrder,
   getOrderStatus,
 } from './services/sideshift-client';
 
@@ -35,6 +37,7 @@ import { OrderMonitor } from './services/order-monitor';
 import { parseUserCommand } from './services/parseUserCommand';
 import { isValidAddress } from './config/address-patterns';
 import { expressIntegration } from '@sentry/node';
+import { formatMarketMessage, getMarketData } from './services/market-service';
 
 dotenv.config();
 
@@ -356,19 +359,26 @@ bot.action('confirm_portfolio', async (ctx) => {
   // Execute portfolio strategy
   try {
     await ctx.answerCbQuery('Executing portfolio strategy...');
-    const result = await executePortfolioStrategy(userId, fromAsset, fromChain, amount, portfolio, settleAddress, bot);
+    const result = await executePortfolioStrategy(userId, {
+      fromAsset,
+      fromChain,
+      amount,
+      portfolio,
+      settleAddress
+    });
     
-    if (result.success) {
+    if (result.failedSwaps.length === 0) {
       ctx.editMessageText(
         `✅ *Portfolio Strategy Executed*\n\n` +
-        `*Orders Created:* ${result.orderIds?.length || 0}\n` +
+        `*Orders Created:* ${result.successfulOrders.length || 0}\n` +
         `*Status:* Processing\n\n` +
         `You'll receive notifications as orders complete.`,
         { parse_mode: 'Markdown' }
       );
     } else {
-      ctx.editMessageText(`❌ Portfolio execution failed: ${result.error || 'Unknown error'}`);
+      ctx.editMessageText(`❌ Portfolio execution failed: ${result.failedSwaps.map(f => f.reason).join(', ') || 'Unknown error'}`);
     }
+
   } catch (error) {
     handleError('PortfolioExecutionFailed', error, ctx);
     ctx.editMessageText('❌ Failed to execute portfolio strategy.');

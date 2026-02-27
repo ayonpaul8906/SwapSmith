@@ -1,8 +1,13 @@
 import { createQuote, createOrder } from './sideshift-client';
 import * as db from './database';
 import logger from './logger';
+import { Telegraf, Context } from 'telegraf';
+import { Update } from 'telegraf/typings/core/types/typegram';
 
 interface PortfolioExecutionResult {
+  success: any;
+  orderIds: any;
+  error: string;
   successfulOrders: Array<{
     order: any;
     allocation: any;
@@ -16,9 +21,7 @@ interface PortfolioExecutionResult {
 }
 
 export async function executePortfolioStrategy(
-  userId: number,
-  parsedCommand: any
-): Promise<PortfolioExecutionResult> {
+userId: number, parsedCommand: any, fromChain: any, amount: any, portfolio: any, settleAddress: any, bot: Telegraf<Context<Update>>): Promise<PortfolioExecutionResult> {
   const { fromAsset, fromChain, amount, portfolio, settleAddress } = parsedCommand;
   const successfulOrders: PortfolioExecutionResult['successfulOrders'] = [];
   const failedSwaps: PortfolioExecutionResult['failedSwaps'] = [];
