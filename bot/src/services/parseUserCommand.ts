@@ -17,29 +17,10 @@ export type ParseResult =
     };
 
 /* ───────────────────────── REGEX ───────────────────────── */
-
-const REGEX_EXCLUSION =
-  /(?:everything|all|entire|max)\s*(?:[A-Z]+\s+)?(?:except|but\s+keep)\s+(\d+(\.\d+)?)\s*([A-Z]+)?/i;
-
-const REGEX_PERCENTAGE =
-  /(\d+(\.\d+)?)\s*(?:%|percent)\s*(?:of\s+(?:my\s+)?)?([A-Z]+)?/i;
-
-const REGEX_HALF = /\bhalf\b\s*(?:of\s+(?:my\s+)?)?([A-Z]+)?/i;
-const REGEX_QUARTER = /\bquarter\b\s*(?:of\s+(?:my\s+)?)?([A-Z]+)?/i;
-const REGEX_MAX_ALL = /\b(max|all|everything|entire)\b/i;
-const REGEX_ALL_TOKEN = /(max|all|everything|entire)\s+([A-Z]+)/i;
-
 const REGEX_TOKENS = /([A-Z]+)\s+(to|into|for)\s+([A-Z]+)/i;
 const REGEX_FROM_TO = /from\s+([A-Z]+)\s+to\s+([A-Z]+)/i;
 const REGEX_AMOUNT_TOKEN =
   /\b(\d+(\.\d+)?)\s+(?!to|into|for|from|with|using\b)([A-Z]+)\b/i;
-
-const REGEX_CONDITION =
-  /(?:if|when)\s+(?:the\s+)?(?:price|rate|market|value)?\s*(?:of\s+)?([A-Z]+)?\s*(?:is|goes|drops|rises|falls)?\s*(above|below|greater|less|more|under|>|<)\s*(?:than)?\s*(\$?[\d,]+(\.\d+)?\s*[kKmM]?)/i;
-
-const REGEX_QUOTE =
-  /(?:([A-Z]+)\s+)?(?:worth|value|valued\s+at)\s*(?:of)?\s*(\$)?(\d+(\.\d+)?)\s*([A-Z]+)?/i;
-
 const REGEX_MULTI_SOURCE =
   /(?:^|\s)([A-Z]{2,10}|(?:\d+(?:\.\d+)?\s+[A-Z]{2,10}))\s+(?:and|&)\s+([A-Z]{2,10}|(?:\d+(?:\.\d+)?\s+[A-Z]{2,10}))\s+(?:to|into|for)/i;
 
@@ -48,15 +29,6 @@ const REGEX_SWAP_STAKE =
 
 const REGEX_STAKE_PROTOCOL =
   /(?:to|on|in|into|using)\s+(aave|compound|yearn|lido|morpho|euler|spark|uniswap|curve|convex)/i;
-
-/* ───────────────────────── HELPERS ───────────────────────── */
-
-function normalizeNumber(val: string): number {
-  val = val.toLowerCase().replace(/[\$,]/g, '');
-  if (val.endsWith('k')) return parseFloat(val) * 1_000;
-  if (val.endsWith('m')) return parseFloat(val) * 1_000_000;
-  return parseFloat(val);
-}
 
 /* ───────────────────────── MAIN PARSER ───────────────────────── */
 
@@ -234,3 +206,4 @@ export async function parseUserCommand(
       originalInput: userInput
     };
   }
+}
