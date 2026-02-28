@@ -37,8 +37,8 @@ const REGEX_QUOTE = /(?:([A-Z]+)\s+)?(?:worth|value|valued\s+at)\s*(?:of)?\s*(\$
 const REGEX_MULTI_SOURCE = /(?:^|\s)([A-Z]{2,10}|(?:\d+(?:\.\d+)?\s+[A-Z]{2,10}))\s+(?:and|&)\s+([A-Z]{2,10}|(?:\d+(?:\.\d+)?\s+[A-Z]{2,10}))\s+(?:to|into|for)/i;
 
 // New Regex for Swap and Stake / Zap intents
-const REGEX_SWAP_STAKE = /(?:swap\s+and\s+stake|zap\s+(?:into|to)|stake\s+(?:my|after|then)|swap\s+(?:to|into)\s+(?:stake|yield))/i;
-const REGEX_STAKE_PROTOCOL = /(?:to\s+)?(aave|compound|yearn|lido|morpho|euler|spark)/i;
+const REGEX_SWAP_STAKE = /(?:swap\s+and\s+stake|zap\s+(?:into|to)|zap\s+\d+|stake\s+(?:my|after|then|immediately)|swap\s+(?:to|into)\s+(?:stake|yield)|stake\s+it|and\s+stake|stake\s+in)/i;
+const REGEX_STAKE_PROTOCOL = /(?:to|on|in|into|using)\s+(aave|compound|yearn|lido|morpho|euler|spark|uniswap|curve|convex)/i;
 
 function normalizeNumber(val: string): number {
     val = val.toLowerCase().replace(/[\$,]/g, '');
@@ -74,17 +74,51 @@ export async function parseUserCommand(
         let fromAsset: string | null = null;
         let toAsset: string | null = null;
 
+        // Extract amount - try multiple patterns
         const amtMatch = input.match(/\b(\d+(\.\d+)?)\b/);
         if (amtMatch) {
             amount = parseFloat(amtMatch[1]);
         }
 
-        const fromToMatch = input.match(/([A-Z]{2,5})\s+(?:to|into)\s+([A-Z]{2,5})/i);
+        // Try to extract from/to assets - multiple patterns
+        // Pattern 1: "ETH to USDC" or "ETH into USDC"
+        let fromToMatch = input.match(/([A-Z]{2,10})\s+(?:to|into|for)\s+([A-Z]{2,10})/i);
         if (fromToMatch) {
-            fromAsset = fromToMatch[1].toUpperCase();
-            toAsset = fromToMatch[2].toUpperCase();
+            const asset1 = fromToMatch[1].toUpperCase();
+            const asset2 = fromToMatch[2].toUpperCase();
+            // Filter out common words that might be mistaken for assets
+            const excludeWords = ['AND', 'STAKE', 'SWAP', 'ZAP', 'THE', 'MY', 'FOR', 'INTO', 'THEN', 'AFTER'];
+            if (!excludeWords.includes(asset1) && !excludeWords.includes(asset2)) {
+                fromAsset = asset1;
+                toAsset = asset2;
+            }
         }
 
+        // Pattern 2: "swap <amount> <asset>" - extract single asset as fromAsset
+        if (!fromAsset) {
+            const singleAssetMatch = input.match(/(?:swap|zap)\s+(?:\d+(?:\.\d+)?\s+)?([A-Z]{2,10})/i);
+            if (singleAssetMatch) {
+                const asset = singleAssetMatch[1].toUpperCase();
+                const excludeWords = ['AND', 'STAKE', 'SWAP', 'ZAP', 'THE', 'MY', 'FOR', 'INTO', 'THEN', 'AFTER'];
+                if (!excludeWords.includes(asset)) {
+                    fromAsset = asset;
+                }
+            }
+        }
+
+        // Pattern 3: "my <asset>" - extract asset
+        if (!fromAsset) {
+            const myAssetMatch = input.match(/my\s+([A-Z]{2,10})/i);
+            if (myAssetMatch) {
+                const asset = myAssetMatch[1].toUpperCase();
+                const excludeWords = ['AND', 'STAKE', 'SWAP', 'ZAP', 'THE', 'MY', 'FOR', 'INTO', 'THEN', 'AFTER'];
+                if (!excludeWords.includes(asset)) {
+                    fromAsset = asset;
+                }
+            }
+        }
+
+        // Default to USDC if no target asset specified
         if (!toAsset) {
             toAsset = 'USDC';
         }
