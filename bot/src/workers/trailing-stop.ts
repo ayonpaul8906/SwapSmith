@@ -192,7 +192,7 @@ export class TrailingStopWorker {
         ? sideshiftOrder.depositAddress 
       const successMessage = `✅ *Trailing Stop Executed!*\n\n` +
         `Order ID: \`${sideshiftOrder.id}\`\n` +
-        `Deposit: ${quote.depositAmount} ${quote.depositCoin} to \`${depositAddress}\`\n` +
+        `Deposit: ${quote.depositAmount} ${quote.depositCoin} to \`${sideshiftOrder.depositAddress}\`\n` +
         `Receive: ${sideshiftOrder.settleAmount} ${sideshiftOrder.settleCoin}\n\n` +
         `Please complete the transaction by sending funds to the deposit address.`;
 

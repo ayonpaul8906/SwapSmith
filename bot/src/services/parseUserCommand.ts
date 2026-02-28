@@ -40,6 +40,18 @@ const REGEX_MULTI_SOURCE = /(?:^|\s)([A-Z]{2,10}|(?:\d+(?:\.\d+)?\s+[A-Z]{2,10})
 const REGEX_SWAP_STAKE = /(?:swap\s+and\s+stake|zap\s+(?:into|to)|stake\s+(?:my|after|then)|swap\s+(?:to|into)\s+(?:stake|yield))/i;
 const REGEX_STAKE_PROTOCOL = /(?:to\s+)?(aave|compound|yearn|lido|morpho|euler|spark)/i;
 
+// New Regex for Trailing Stop Orders
+const REGEX_TRAILING_STOP = /(?:trailing\s+stop|stop\s+loss|protect\s+profit|trailing)/i;
+const REGEX_TRAILING_PERCENTAGE = /(\d+(\.\d+)?)\s*(?:%|percent)\s*(?:trailing|stop|drop|decline|fall)/i;
+const REGEX_TRAILING_AMOUNT = /(?:trailing\s+stop|stop\s+loss)\s+(?:at\s+)?(\d+(\.\d+)?)\s*(?:%|percent)/i;
+
+// New Regex for Portfolio Rebalancing
+const REGEX_PORTFOLIO_REBALANCE = /(?:rebalance|re-?balanc(?:e|ing)|balance\s+(?:my\s+)?portfolio|set\s+portfolio|portfolio\s+target|allocate)/i;
+const REGEX_PORTFOLIO_DRIFT = /drift\s+(?:threshold|limit)?\s*(\d+(?:\.\d+)?)\s*%/i;
+const REGEX_PORTFOLIO_AUTO = /(?:auto(?:matic)?|automatically)\s*(?:rebalance|trade)/i;
+const REGEX_ASSET_PERCENTAGE = /([A-Z]{2,5})\s+(?:=|:|to|at|target)?\s*(\d+(?:\.\d+)?)\s*%/gi;
+
+
 function normalizeNumber(val: string): number {
     val = val.toLowerCase().replace(/[\$,]/g, '');
 
@@ -74,9 +86,265 @@ export async function parseUserCommand(
         let fromAsset: string | null = null;
         let toAsset: string | null = null;
 
-        const amtMatch = input.match(/\b(\d+(\.\d+)?)\b/);
-        if (amtMatch) {
-            amount = parseFloat(amtMatch[1]);
+    // Extract amount
+    const amtMatch = input.match(/\b(\d+(\.\d+)?)\b/);
+    if (amtMatch) {
+      amount = parseFloat(amtMatch[1]);
+    }
+
+    // Extract tokens
+    const fromToMatch = input.match(/([A-Z]{2,5})\s+(?:to|into)\s+([A-Z]{2,5})/i);
+    if (fromToMatch) {
+      fromAsset = fromToMatch[1].toUpperCase();
+      toAsset = fromToMatch[2].toUpperCase();
+    } else {
+      // Try to find single token
+      const tokenMatch = input.match(/([A-Z]{2,5})/);
+      if (tokenMatch) {
+        fromAsset = tokenMatch[1].toUpperCase();
+        toAsset = 'USDC'; // Default to stablecoin
+      }
+    }
+
+    // Default trailing percentage if not specified
+    if (!trailingPercentage) {
+      trailingPercentage = 5.0; // Default 5% trailing stop
+    }
+
+    return {
+      success: true,
+      intent: 'trailing_stop',
+      fromAsset: fromAsset || null,
+      fromChain: null,
+      toAsset: toAsset || 'USDC',
+      toChain: null,
+      amount: amount || null,
+      amountType: amount ? 'exact' : null,
+      trailingPercentage,
+      excludeAmount: undefined,
+      excludeToken: undefined,
+      quoteAmount: undefined,
+      conditions: undefined,
+      portfolio: undefined,
+      frequency: null,
+      dayOfWeek: null,
+      dayOfMonth: null,
+      settleAsset: null,
+      settleNetwork: null,
+      settleAmount: null,
+      settleAddress: null,
+      fromProject: null,
+      fromYield: null,
+      toProject: null,
+      toYield: null,
+      conditionOperator: undefined,
+      conditionValue: undefined,
+      conditionAsset: undefined,
+      targetPrice: undefined,
+      condition: undefined,
+      confidence: 85,
+      validationErrors: [],
+      parsedMessage: `Parsed: Trailing stop order - Sell ${amount || '?'} ${fromAsset || '?'} if price drops ${trailingPercentage}% from peak`,
+      requiresConfirmation: true,
+      originalInput: userInput
+    };
+  }
+
+  // Check for Portfolio Rebalancing Intent
+  if (REGEX_PORTFOLIO_REBALANCE.test(input)) {
+    const assets: { coin: string; percentage: number }[] = [];
+    const assetMatches = input.matchAll(REGEX_ASSET_PERCENTAGE);
+    for (const match of assetMatches) {
+      const coin = match[1].toUpperCase();
+      const percentage = parseFloat(match[2]);
+      if (coin && percentage > 0) {
+        assets.push({ coin, percentage });
+      }
+    }
+
+    let driftThreshold = 5.0;
+    const driftMatch = input.match(REGEX_PORTFOLIO_DRIFT);
+    if (driftMatch) {
+      driftThreshold = parseFloat(driftMatch[1]);
+    }
+
+    const autoRebalance = REGEX_PORTFOLIO_AUTO.test(input);
+
+    let portfolioName = 'My Portfolio';
+    if (input.includes('conservative')) portfolioName = 'Conservative Portfolio';
+    else if (input.includes('balanced')) portfolioName = 'Balanced Portfolio';
+    else if (input.includes('growth')) portfolioName = 'Growth Portfolio';
+    else if (input.includes('aggressive')) portfolioName = 'Aggressive Portfolio';
+
+    return {
+      success: true,
+      intent: 'portfolio',
+      fromAsset: null,
+      fromChain: null,
+      toAsset: null,
+      toChain: null,
+      amount: null,
+      amountType: null,
+      excludeAmount: undefined,
+      excludeToken: undefined,
+      quoteAmount: undefined,
+      conditions: undefined,
+      portfolio: assets.map(a => ({
+        toAsset: a.coin,
+        toChain: 'ethereum',
+        percentage: a.percentage
+      })),
+      driftThreshold,
+      autoRebalance,
+      portfolioName,
+      frequency: null,
+      dayOfWeek: null,
+      dayOfMonth: null,
+      settleAsset: null,
+      settleNetwork: null,
+      settleAmount: null,
+      settleAddress: null,
+      fromProject: null,
+      fromYield: null,
+      toProject: null,
+      toYield: null,
+      conditionOperator: undefined,
+      conditionValue: undefined,
+      conditionAsset: undefined,
+      targetPrice: undefined,
+      condition: undefined,
+      confidence: assets.length > 0 ? 90 : 70,
+      validationErrors: assets.length === 0 ? ['No asset allocations found'] : [],
+      parsedMessage: `Parsed: Portfolio rebalancing - ${assets.map(a => `${a.coin}: ${a.percentage}%`).join(', ')}, ${driftThreshold}% drift threshold, ${autoRebalance ? 'auto' : 'manual'}`,
+      requiresConfirmation: true,
+      originalInput: userInput
+    };
+  }
+
+  // Check for Swap and Stake / Zap Intent
+  if (REGEX_SWAP_STAKE.test(input)) {
+
+    const protocolMatch = input.match(REGEX_STAKE_PROTOCOL);
+    const stakeProtocol = protocolMatch ? protocolMatch[1].toLowerCase() : null;
+    
+    let amount: number | null = null;
+    let fromAsset: string | null = null;
+    let toAsset: string | null = null;
+    
+    const amtMatch = input.match(/\b(\d+(\.\d+)?)\b/);
+    if (amtMatch) {
+      amount = parseFloat(amtMatch[1]);
+    }
+    
+    const fromToMatch = input.match(/([A-Z]{2,5})\s+(?:to|into)\s+([A-Z]{2,5})/i);
+    if (fromToMatch) {
+      fromAsset = fromToMatch[1].toUpperCase();
+      toAsset = fromToMatch[2].toUpperCase();
+    }
+    
+    if (!toAsset) {
+      toAsset = 'USDC';
+    }
+    
+    return {
+      success: true,
+      intent: 'swap_and_stake',
+      fromAsset,
+      fromChain: null,
+      toAsset,
+      toChain: null,
+      amount,
+      amountType: amount ? 'exact' : null,
+      excludeAmount: undefined,
+      excludeToken: undefined,
+      quoteAmount: undefined,
+      conditions: undefined,
+      portfolio: undefined,
+      frequency: null,
+      dayOfWeek: null,
+      dayOfMonth: null,
+      settleAsset: null,
+      settleNetwork: null,
+      settleAmount: null,
+      settleAddress: null,
+      fromProject: stakeProtocol,
+      fromYield: null,
+      toProject: stakeProtocol,
+      toYield: null,
+      conditionOperator: undefined,
+      conditionValue: undefined,
+      conditionAsset: undefined,
+      targetPrice: undefined,
+      condition: undefined,
+      confidence: 80,
+      validationErrors: [],
+      parsedMessage: `Parsed: Swap ${amount || '?'} ${fromAsset || '?'} to ${toAsset} and stake`,
+      requiresConfirmation: true,
+      originalInput: userInput
+    };
+  }
+
+  // 1. Check for Swap Intent Keywords
+  const isSwapRelated = /\b(swap|convert|send|transfer|buy|sell|move|exchange)\b/i.test(input);
+
+  if (isSwapRelated) {
+    let intent: ParsedCommand['intent'] = 'swap';
+    let amountType: ParsedCommand['amountType'] = null;
+    let amount: number | null = null;
+    let excludeAmount: number | undefined;
+    let excludeToken: string | undefined;
+    let quoteAmount: number | undefined;
+    let fromAsset: string | null = null;
+    let toAsset: string | null = null;
+    let confidence = 0;
+    let validationErrors: string[] = [];
+
+    // Boost confidence slightly for explicit swap keywords
+    confidence += 10;
+
+    // Limit Order fields
+    let conditionOperator: 'gt' | 'lt' | undefined;
+    let conditionValue: number | undefined;
+    let conditionAsset: string | undefined;
+    let conditions: ParsedCommand['conditions'];
+
+    // Check Multi-source
+    if (REGEX_MULTI_SOURCE.test(input)) {
+        validationErrors.push('Multiple source assets not supported');
+        return {
+             success: false,
+             intent: 'swap',
+             fromAsset: null, fromChain: null, toAsset: null, toChain: null, amount: null,
+             settleAsset: null, settleNetwork: null, settleAmount: null, settleAddress: null,
+             fromProject: null, fromYield: null, toProject: null, toYield: null,
+             validationErrors,
+             confidence: 0,
+             parsedMessage: 'Multiple source assets detected',
+             requiresConfirmation: false,
+             originalInput: userInput
+        };
+    }
+
+    // A. Detect Exclusion
+    const exclusionMatch = input.match(REGEX_EXCLUSION);
+    if (exclusionMatch) {
+      amountType = 'all';
+      excludeAmount = parseFloat(exclusionMatch[1]);
+      if (exclusionMatch[3]) {
+        excludeToken = exclusionMatch[3].toUpperCase();
+        if (!fromAsset) fromAsset = excludeToken;
+      }
+      confidence += 40;
+    }
+
+    // Attempt to extract token from "all [Token]" if we identified 'all' but missed the token
+    if (amountType === 'all' && !fromAsset) {
+        const allTokenMatch = input.match(REGEX_ALL_TOKEN);
+        if (allTokenMatch) {
+             const token = allTokenMatch[2].toUpperCase();
+             if (!/^(swap|convert|send|transfer|buy|sell|move|exchange)$/i.test(token)) {
+                 fromAsset = token;
+             }
         }
 
         const fromToMatch = input.match(/([A-Z]{2,5})\s+(?:to|into)\s+([A-Z]{2,5})/i);
